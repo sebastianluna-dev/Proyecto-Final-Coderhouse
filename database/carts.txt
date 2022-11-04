@@ -1,0 +1,6 @@
+[
+    {"id":2,"timestamp":1667477380992,"products":[{"title":"Smart TV","description":"Samsung smart tv, 64', 4k  ","code":"3478-8112-3426-2635","price":799,"stock":28,"image_url":"https://media.admagazine.com/photos/618a5e31259e475000cce73b/master/w_1600%2Cc_limit/92495.jpg","id":2,"timestamp":1667525713539}]},
+    {"id":3,"timestamp":1667477534366,"products":[]},
+    {"id":4,"timestamp":1667477613743,"products":[]},
+    {"id":5,"timestamp":1667477670768,"products":[]}
+]
