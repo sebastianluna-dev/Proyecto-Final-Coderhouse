@@ -1,69 +1,52 @@
-const { readFile, writeFile } = require("fs/promises")
+import mongoose from "mongoose";
+import { cartCollection, cartSchema } from "../models/Cart.js"
+import { productDAO } from "./product.service.js";
 
-module.exports = class Cart {
-
-    constructor(fileName) {
-        this._fileName = fileName
-        this._counter = 1
+export class CartService {
+    constructor(name, schema) {
+        this.model = mongoose.model(name, schema)
     }
     async createCart() {
-        this._counter = 1
-        const fileContent = await readFile(`./database/${this._fileName}`, { encoding: "utf-8", flag:'r'})
-        const objectArray = JSON.parse(fileContent)
-        let isObject = objectArray.find(obj => obj.id === this._counter)
-        while (isObject) {
-            this._counter = this._counter + 1
-            isObject = objectArray.find(obj => obj.id === this._counter)
+        const response = await this.model.create({products:[]})
+        console.log("createCart response: ",response)
+        return response
+    }
+    async getCartById(id) {
+        const response = await this.model.findById(id)
+        return response 
+    }
+    async deleteCartById(id) {
+        const response = await this.model.findByIdAndDelete(id)
+        return response
+    }
+    async getProducts(id) {
+        try {
+            const cart = await this.model.findById(id)
+            const cartIds = cart.products.map(product => product._id.toString())
+            const products = []
+            for ( id of cartIds ) {
+                const product = await productDAO.getById(id)
+                products.push(product)
+            }
+            return(products)
+        } catch (error) {
+            return(error)
         }
-        const newObject =  {
-            id: this._counter, 
-            timestamp: Date.now(),
-            products: []
+    }
+    async addProduct(id, id_prod) {  
+        const cart = await this.model.findById(id)
+        const isProduct = cart.products.find(product => product._id.toString() === id_prod)
+        if (!isProduct) {
+            const product = await productDAO.getById(id_prod)
+            cart.products.push(product)
+            await cart.save()
+            return { message: "saved" }
         }
-        objectArray.push(newObject)
-        await writeFile(`./database/${this._fileName}`, JSON.stringify(objectArray),{ encoding: "utf-8", flag:'w'})
-        return newObject.id
+        return { message: "dont saved"}
     }
-    async deleteCart(id) {
-        const fileContent = await readFile(`./database/${this._fileName}`, { encoding: "utf-8", flag:'r'})
-        const objectArray = JSON.parse(fileContent)
-        const object = objectArray.findIndex(obj => obj.id === id)
-        if (object < 0) 
-            return false 
-        const filteredData = objectArray.filter(obj => obj.id !== id)
-        await writeFile(`./database/${this._fileName}`, JSON.stringify(filteredData),{ encoding: "utf-8", flag:'w'})
-        return true
-    }
-    async getCartProducts(id) {
-        const fileContent = await readFile(`./database/${this._fileName}`, { encoding: "utf-8", flag:'r'})
-        const objectArray = JSON.parse(fileContent)
-        const cartIndex = objectArray.findIndex(obj => obj.id === id)
-        if (cartIndex < 0) 
-            return false
-        return objectArray[cartIndex].products
-    }
-    async addCartProduct(id, product) {
-        const fileContent = await readFile(`./database/${this._fileName}`, { encoding: "utf-8", flag:'r'})
-        const objectArray = JSON.parse(fileContent)
-        const cartIndex = objectArray.findIndex(obj => obj.id === id)
-        if (cartIndex < 0) 
-            return false
-        objectArray[cartIndex].products.push(product)
-        await writeFile(`./database/${this._fileName}`, JSON.stringify(objectArray),{ encoding: "utf-8", flag:'w'})
-        return true
-    }
-    async deleteCartProduct(id, id_prod) {
-        const fileContent = await readFile(`./database/${this._fileName}`, { encoding: "utf-8", flag:'r'})
-        const objectArray = JSON.parse(fileContent)
-        const cartIndex = objectArray.findIndex(obj => obj.id === id)
-        if (cartIndex < 0) 
-            return { status: false, message: "There is not any cart with that id" }
-        const products = objectArray[cartIndex].products
-        const productIndex = products.findIndex(obj => obj.id === id_prod)
-        if (productIndex < 0) 
-            return { status: false, message: "There is not any product with that id in this cart" }
-        objectArray[cartIndex].products = products.filter(obj => obj.id !== id_prod)
-        await writeFile(`./database/${this._fileName}`, JSON.stringify(objectArray),{ encoding: "utf-8", flag:'w'})
-        return products.filter(obj => obj.id === id_prod)
+    async deleteProduct(id) {
     }
 }
+
+const cartDAO = new CartService(cartCollection, cartSchema)
+export { cartDAO }

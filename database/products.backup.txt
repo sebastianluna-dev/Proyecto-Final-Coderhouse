@@ -3,7 +3,8 @@
         "title":"Pixel Watch",
         "description":"Reloj inteligente de google",
         "code":"3456-3452-3467-2322",
-        "price":449,"stock":100,
+        "price":449,
+        "stock":100,
         "image_url":"https://iphoneros.com/wp-content/uploads/2022/05/pixewatch.jpg",
         "id":1,
         "timestamp":1667525514354

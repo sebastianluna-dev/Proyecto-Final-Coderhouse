@@ -1,51 +1,62 @@
-const express = require("express")
-const cart = require("../services/cart.service")
-const Products = require("../services/products.service")
-const router = express.Router()
-const file = new cart("carts.txt")
-const products = new Products("products.txt")
+import { Router } from "express"
+import { cartDAO } from "../services/cart.service.js"
+const router = Router()
 
-const checkProduct = async (req, res, next) => {
-    const { id_prod } = req.params
-    const product = await products.getById(parseInt(id_prod))
-    console.log(product)
-    if ( product?.message ) {
-        res.send(false)
-    } else {
-        next()
-        console.log(product)
+router.post("/is_cart", async (req, res) => {
+
+    const { cartId } = req.cookies
+    const cart = await cartDAO.getCartById(cartId)
+
+    if (!cartId || !cart) {
+        console.log("no hay cookie de carrito")
+        const newCart = await cartDAO.createCart()
+        console.log(newCart)
+        res.cookie("cartId", newCart._id).send({isCart: true})
+        return
     }
-}
+    console.log("si hay cookie de carrtio y si la encontro")
+    res.send({isCart: true})
+    
+    
+}) 
 
 router.post("/", async (req, res) => {
-    const id = toString(await file.createCart())
-    res.send(id)
-})
-
-router.delete("/:id", async (req, res) => {
-    const { id } = req.params
-    const cart  = await file.deleteCart(parseInt(id))
+    const { cartId } = req.cookies
+    const cart = await cartDAO.getCartById(cartId)
     res.send(cart)
 })
 
-router.get("/:id/products", async (req, res) => {
-    const { id } = req.params
-    const products  = await file.getCartProducts(parseInt(id))
-    res.send(products)
+router.delete("/", async (req, res) => {
+    const { cartId } = req.cookies
+    if (cartId) {
+        const cart = await await cartDAO.deleteCartById(cartId)
+        res.send(cart)
+    } else {
+        res.send({message: "there no a cart"})
+    }
 })
 
-router.post("/:id/products/:id_prod", checkProduct, async (req, res) => {
-    const { id } = req.params
-    const { id_prod } = req.params
-    const product = await products.getById(parseInt(id_prod))
-    const addProduct = await file.addCartProduct(parseInt(id), product)
-    res.send(addProduct)
+router.post("/products/:id_prod", async (req, res) => {
+    const { cartId } = req.cookies
+    const { id_prod } = req.params 
+    const cart = await cartDAO.addProduct(cartId, id_prod)
+    res.send(cart)
 })
 
-router.delete("/:id/products/:id_prod", checkProduct, async (req, res) => {
-    const { id, id_prod } = req.params
-    const product = await file.deleteCartProduct(parseInt(id), parseInt(id_prod))
+router.get("/products", async (req, res) => {
+    const { cartId } = req.cookies
+    if (cartId) {
+        const products = await cartDAO.getProducts(cartId)
+        res.send(products)
+    } else {
+        res.send({message: "there no a cart"})
+    }
+})
+
+router.delete("/products/:id_prod", async (req, res) => {
+    const { cartId } = req.cookies
+    const product = await cartDAO.deleteProduct(cartId)
     res.send(product)
 })
 
-module.exports = router
+export default router 
