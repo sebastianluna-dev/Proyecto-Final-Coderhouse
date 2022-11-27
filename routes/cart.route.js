@@ -24,7 +24,8 @@ router.post("/is_cart", isCartId, async (req, res) => {
     const cart = await cartDAO.getCartById(cartId)
     if (!cart) {
         const newCart = await cartDAO.createCart()
-        res.cookie("cartId", newCart._id).send({isCart: true})
+        res.cookie("cartId", newCart._id, { httpOnly: true })
+        req.send({isCart: true})
         return
     }
     res.send({isCart: true})
