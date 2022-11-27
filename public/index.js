@@ -5,14 +5,24 @@ const cartSidebar = document.querySelector("#cartSidebar")
 const closeCartButton = document.querySelector("#closeCartButton")
 const openCartButton = document.querySelector("#openCartButton")
 const cartProductsContainer = document.querySelector("#cartProductsContainer")
+const sidebarWhite = document.querySelector("#sidebar")
+
+
+let isOpenCartOnce = false
 
 const openCartModal = () => {
-    openCartButton.classList.add("hidden")
-    cartSidebar.classList.remove("hidden")
+    cartSidebar.classList.remove("pointer-event-none")
+    cartBackground.classList.remove("closed")
+    sidebarWhite.classList.remove("closed")
+    if (!isOpenCartOnce) {
+        isOpenCartOnce = true 
+        loadCartProducts()
+    }
 }
 const closeCartModal = () => {
-    cartSidebar.classList.add("hidden") 
-    openCartButton.classList.remove("hidden")
+    cartSidebar.classList.add("pointer-event-none")
+    cartBackground.classList.add("closed")
+    sidebarWhite.classList.add("closed")
 }
 
 cartBackground.addEventListener("click", closeCartModal)
@@ -21,7 +31,7 @@ openCartButton.addEventListener("click", openCartModal)
 
 const deleteProduct = async (id) => {
     const product = document.querySelector(`#product${id}`)
-    const res = await fetch(`/api/products`, {
+    const res = await fetch("/api/products", {
         method: "DELETE",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ id })
@@ -33,7 +43,15 @@ const deleteProduct = async (id) => {
 }
 
 const deleteCartProduct = async (id) => {
-
+    const product = document.querySelector(`#productCart${id}`)
+    const res = await fetch("/api/cart/products", {
+        method: "DELETE",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+    })
+    if (res.status === 200) {
+        product.remove()
+    }
 }
 
 const createCartIfDoesntExist = async () => {
@@ -45,8 +63,12 @@ const createCartIfDoesntExist = async () => {
     console.log(cart)
 }
 
-const addProductToCart = async (productId) => {
-    const res = await fetch(`api/cart/products/${productId}`, {method: "POST"})
+const addProductToCart = async (id) => {
+    const res = await fetch(`api/cart/products`, {  
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+    })
     const cart = await res.json()
     console.log(cart)
 }
@@ -94,6 +116,7 @@ const createProduct = ({title, image, price, _id}) => {
         await createCartIfDoesntExist()
         await addProductToCart(_id)
         await getCartProducts()
+        openCartModal()
     })
     addToCartButton.className = "bg-red-400 p-2 rounded-md block mx-auto mt-4 text-white font-semibold"
     addToCartButton.append(buttonCartText)
@@ -143,12 +166,10 @@ const createCartProduct = ({title, image, price, _id}) => {
     const productContainer = document.createElement("div")
     productContainer.className = "bg-white grid grid-cols-2 hover:shadow-2xl rounded-2xl overflow-hidden duration-150 cursor-pointer mb-4" 
     productContainer.append(productImage, productDescription)
-    productContainer.id = `product${_id}`
+    productContainer.id = `productCart${_id}`
 
     return productContainer
 }
-
-
 
 const onClickButton = async (event) => {
     event.preventDefault()
@@ -175,9 +196,6 @@ const onClickButton = async (event) => {
 
 }
 
-
-
-
 const getProducts = async () => {
     const res = await fetch("/api/products")
     const data = await res.json()
@@ -186,19 +204,24 @@ const getProducts = async () => {
 }
 
 const getCartProducts = async () => {
-    cartProductsContainer.innerHTML = ""
+    console.log("getcartproducts")
     const res = await fetch("/api/cart/products")
     const data = await res.json()
     if (Array.isArray(data)) {
         const arrrayFiltered = data.filter(product => product !== null)
         const elementsArray = arrrayFiltered.map(product => createCartProduct(product))
+        cartProductsContainer.innerHTML = ""
         cartProductsContainer.append(...elementsArray)
     }
 }
 
 getProducts()
 
-getCartProducts()
+
+const loadCartProducts = async () => {
+    await createCartIfDoesntExist()
+    await getCartProducts()
+}
 
 submitButton.addEventListener("submit",  onClickButton)
 

@@ -1,0 +1,22 @@
+#sidebar {
+    transition-duration: .7s;
+}
+
+#sidebar.closed {
+    transform: translateX(+100%) !important;
+}
+
+#cartBackground {
+    transition-duration: .7s;
+}
+#cartBackground.closed {
+    opacity: 0;
+}
+
+#cartBackground {
+    opacity: .3;
+}
+
+.pointer-event-none {
+    pointer-events: none;
+}
