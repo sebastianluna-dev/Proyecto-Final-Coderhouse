@@ -55,7 +55,7 @@ const deleteCartProduct = async (id) => {
 }
 
 const createCartIfDoesntExist = async () => {
-    const isCartResponse = await fetch("api/cart/is_cart", {method: "POST"})
+    const isCartResponse = await fetch("api/cart/is_cart", {method: "POST", credentials: "include"})
     const isCart = await isCartResponse.json()
     console.log(isCart)
     const res = await fetch(`api/cart`, {method: "POST"})
