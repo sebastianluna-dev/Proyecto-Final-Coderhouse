@@ -17,10 +17,6 @@ export class ProductService {
         const response = await this.model.findById(id)
         return response
     }
-    async updateById(id, newData) {
-        const response = await this.model.findByIdAndUpdate(id, newData, { new: true })
-        return response
-    }
     async deleteById(id) {
         const response = await this.model.findByIdAndDelete(id)
         return response

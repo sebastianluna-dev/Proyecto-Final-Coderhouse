@@ -1,5 +1,7 @@
 import { Router } from "express"
 import { productDAO } from "../services/product.service.js"
+import { verifyProduct } from "../middlewares/verifyProduct.js"
+
 const router = Router()
 
 router.get("/", async (req, res) => {
@@ -7,25 +9,19 @@ router.get("/", async (req, res) => {
     res.send(products)
 })
 
-router.post("/", async (req, res) => {
+router.post("/", verifyProduct , async (req, res) => {
     const products = await productDAO.save(req.body)
     res.send(products)
 })
 
-router.put("/:id", async (req, res) => {
-    const { id } = req.params
-    const replacedProduct = await productDAO.updateById(parseInt(id), req.body)
-    res.send(replacedProduct)
-})
-
 router.get("/:id", async (req, res) => {
-    const { id } = req.params
-    const product = await productDAO.getById(parseInt(id))
+    const id = parseInt(req.params.id)
+    const product = await productDAO.getById(id)
     res.send(product)
 })
 
 router.delete("/", async (req, res)=> {
-    const { id } = req.body
+    const id = req.body.id
     const product = await productDAO.deleteById(id)
     res.send(product)
 })

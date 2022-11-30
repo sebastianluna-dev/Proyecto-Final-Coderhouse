@@ -55,12 +55,12 @@ const deleteCartProduct = async (id) => {
 }
 
 const createCartIfDoesntExist = async () => {
-    const isCartResponse = await fetch("api/cart/is_cart", {method: "POST", credentials: "include"})
+    const isCartResponse = await fetch("api/cart", {
+        method: "POST", 
+        credentials: "include"
+    })
     const isCart = await isCartResponse.json()
     console.log(isCart)
-    const res = await fetch(`api/cart`, {method: "POST"})
-    const cart = await res.json()
-    console.log(cart)
 }
 
 const addProductToCart = async (id) => {
@@ -74,7 +74,9 @@ const addProductToCart = async (id) => {
 }
 
 const deleteCart = async () => {
-    const res = await fetch("api/cart", {method: "DELETE"})
+    const res = await fetch("api/cart", {
+        method: "DELETE"
+    })
     const response = await res.json()
     if (!response.message) {
         cartProductsContainer.innerHTML = ""

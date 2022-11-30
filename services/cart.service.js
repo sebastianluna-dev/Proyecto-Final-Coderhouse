@@ -20,7 +20,6 @@ export class CartService {
     }
     async getCartProducts(id) {
         const cart = await this.model.findById(id)
-        console.log(cart.products)
         const cartIds = cart.products.map(product => product?.toString())
         const products = []
         for (id of cartIds) {
@@ -31,7 +30,6 @@ export class CartService {
     }
     async addCartProduct(id, id_prod) {  
         const cart = await this.model.findById(id)
-        console.log(cart.products)
         const isProduct = cart.products.find(product => product?.toString() === id_prod)
         if (!isProduct) {
             const product = await productDAO.getById(id_prod)
@@ -43,7 +41,6 @@ export class CartService {
     }
     async deleteCartProduct(id, id_prod) {
         const cart = await this.model.findById(id)
-        console.log(cart.products)
         const isProduct = cart.products.find(product => product?.toString() === id_prod)
         const productIndex = cart.products.findIndex(product => product?.toString() === id_prod)
         if (isProduct) {
